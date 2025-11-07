@@ -37,18 +37,11 @@ Photos
 -piecewise
 <img width="64" height="64" alt="piecewise" src="https://github.com/user-attachments/assets/28fc7dc4-cef8-4fd5-b8bc-22fcc2d97c62" />
 ---
--
--
--
--
--
--
--
 
-
+---
 
 -Code
-
+---
 
 ```c
 
