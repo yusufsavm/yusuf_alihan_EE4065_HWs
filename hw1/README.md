@@ -11,17 +11,21 @@
 ---
 ## 📸 Photos
 
-### 🖼️ Temel Görüntüler
+### 🖼️ Main Image
 
-| Görüntü Açıklaması | Sonuç Görüntüsü |
+| Image Type | Image |
 | :--- | :---: |
 | **Main Image** (Grayscaled 64x64) | ![mainimg](https://github.com/user-attachments/assets/e0193dc9-6db3-4b59-a843-df4d8afbf450) |
----
+
+
+| Image Type | Image |
+| :--- | :---: |
 | **Negative Transformation** (255 - pixel) | ![negative image](https://github.com/user-attachments/assets/2b775156-d00a-499b-a7d5-e2b94603dade) |
 
 ### 📊 Thresholding Karşılaştırması
 
-| Threshold Değeri | Görüntü |
+| Image Type | Image |
+| :--- | :---: |
 | :--- | :---: |
 | **Threshold = 70** | ![treshold70image](https://github.com/user-attachments/assets/c06dba60-e383-49ac-b21d-73defaecbdda) |
 | **Threshold = 140** | ![treshold140image](https://github.com/user-attachments/assets/f08389af-9635-40b2-b1c2-4d4310243cf3) |
