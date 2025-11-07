@@ -137,21 +137,21 @@ void apply_gamma_correction(const unsigned char* pSrc, unsigned char* pDst, int 
 
 void apply_piecewise_linear(const unsigned char* pSrc, unsigned char* pDst, int size, unsigned char r1, unsigned char r2)
 {
-    // Hatalı girdiyi önle (r1, r2'ye eşit veya büyükse)
+   
     if (r1 >= r2) {
         r1 = 0;
         r2 = 255;
     }
 
-    // Tamsayı matematiği için r2-r1 farkını al
+   
     unsigned char delta_r = r2 - r1;
 
-    // Sıfıra bölme hatasını engelle (r1 == r2 durumu, yukarıda yakalandı ama yine de güvenli)
+    
     if (delta_r == 0) {
         for (int i = 0; i < size; i++) {
              pDst[i] = (pSrc[i] <= r1) ? 0 : 255;
         }
-        return; // Fonksiyondan çık
+        return; 
     }
 
 
@@ -169,13 +169,13 @@ void apply_piecewise_linear(const unsigned char* pSrc, unsigned char* pDst, int 
         }
         else
         {
-            // === FLOAT YERİNE TAMSAYI MATEMATİĞİ ===
+           
             // (p - r1) * 255 / (r2 - r1)
 
-            // 1. Önce (p - r1) farkını bul (en fazla 255 olabilir)
+           
             uint32_t temp = (uint32_t)(p - r1);
 
-            // 2. 255 ile çarp (en fazla 255 * 255 = 65025 olur, uint32_t güvende)
+            
             temp = temp * 255;
 
 
