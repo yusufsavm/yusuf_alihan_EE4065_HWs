@@ -1,3 +1,16 @@
+#HW1
+---
+
+
+
+| Name | Student ID |
+| :--- | :--- |
+| Yusuf Oruç | 150720036 |
+| Alihan Kocaakman | 15072065 |
+
+---
+
+
 Photos
 
 -main image grayscaled 64x64
