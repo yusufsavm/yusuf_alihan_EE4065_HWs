@@ -35,8 +35,8 @@
 
 | Image Type | Image |
 | :--- | :---: |
-| **Gamma Correction** ($\gamma = 3$) | ![gama3image](https://github.com/user-attachments/assets/fea14ba5-b10b-4303-bf72-08df09e99e12) |
-| **Gamma Correction** ($\gamma = 1/3$) | ![gama0 33image](https://github.com/user-attachments/assets/50ef6186-c7e1-41a6-85a2-1986ac2e91d5) |
+| **Gamma Correction** ($\gamma = 1/3$) | ![gama3image](https://github.com/user-attachments/assets/fea14ba5-b10b-4303-bf72-08df09e99e12) |
+| **Gamma Correction** ($\gamma = 3$) | ![gama0 33image](https://github.com/user-attachments/assets/50ef6186-c7e1-41a6-85a2-1986ac2e91d5) |
 
 ### Piecewise Transformation
 
