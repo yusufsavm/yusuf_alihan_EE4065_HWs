@@ -193,3 +193,42 @@ void histogram_equalization(const uint8_t* input_img, uint8_t* output_img, uint3
         output_img[i] = map[input_img[i]];
     }
 }
+int main(void)
+{
+  HAL_Init();
+  SystemClock_Config();
+  MX_GPIO_Init();
+
+
+  //calculate_histogram(image, WIDTH, HEIGHT, histogram);
+  //histogram_equalization(image, equalized_image, WIDTH, HEIGHT);
+  //calculate_histogram(equalized_image, WIDTH, HEIGHT, histogram_equalized);
+  //apply_convolution_3x3(image, image_lpf, WIDTH, HEIGHT, kernel_lpf, 9);
+  //apply_convolution_3x3(image, image_hpf, WIDTH, HEIGHT, kernel_hpf, 1);
+  median_filter_3x3(image, image_median, WIDTH, HEIGHT);
+
+  while (1)
+  {
+
+  }
+}
+
+
+
+void SystemClock_Config(void)
+{
+
+}
+
+static void MX_GPIO_Init(void)
+{
+
+}
+
+void Error_Handler(void)
+{
+  __disable_irq();
+  while (1)
+  {
+  }
+}
