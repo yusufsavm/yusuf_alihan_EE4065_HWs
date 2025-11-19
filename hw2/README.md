@@ -200,11 +200,11 @@ int main(void)
   MX_GPIO_Init();
 
 
-  //calculate_histogram(image, WIDTH, HEIGHT, histogram);
-  //histogram_equalization(image, equalized_image, WIDTH, HEIGHT);
-  //calculate_histogram(equalized_image, WIDTH, HEIGHT, histogram_equalized);
-  //apply_convolution_3x3(image, image_lpf, WIDTH, HEIGHT, kernel_lpf, 9);
-  //apply_convolution_3x3(image, image_hpf, WIDTH, HEIGHT, kernel_hpf, 1);
+  calculate_histogram(image, WIDTH, HEIGHT, histogram);
+  histogram_equalization(image, equalized_image, WIDTH, HEIGHT);
+  calculate_histogram(equalized_image, WIDTH, HEIGHT, histogram_equalized);
+  apply_convolution_3x3(image, image_lpf, WIDTH, HEIGHT, kernel_lpf, 9);
+  apply_convolution_3x3(image, image_hpf, WIDTH, HEIGHT, kernel_hpf, 1);
   median_filter_3x3(image, image_median, WIDTH, HEIGHT);
 
   while (1)
