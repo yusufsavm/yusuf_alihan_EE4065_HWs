@@ -12,7 +12,7 @@
 
 
 
-![Language](https://img.shields.io/badge/language-C-blue.svg) ![Platform](https://img.shields.io/badge/platform-STM32-green.svg) ![IDE](https://img.shields.io/badge/IDE-STM32CubeIDE-blueviolet.svg)
+![Language](https://img.shields.io/badge/language-C-blue.svg) ![Platform](https://img.shields.io/badge/platform-STM32F446RE-green.svg) ![IDE](https://img.shields.io/badge/IDE-STM32CubeIDE-blueviolet.svg)
 
 ## 📂 Project Overview
 
