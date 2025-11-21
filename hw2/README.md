@@ -42,6 +42,12 @@ After applying the equalization algorithm, the pixel intensities are redistribut
 | ![equalized_image](https://github.com/user-attachments/assets/01639020-37ad-4d54-b2a5-6e24c6ddc781) |
 
 ---
+| Histogram Equalization Calculation on Paper |
+| :---: |
+| ![IMG_0271](https://github.com/user-attachments/assets/72cb2e58-920d-417d-8c1a-eed50dc7c2e9) |
+| ![IMG_0272](https://github.com/user-attachments/assets/d7ba520d-13f5-4a58-ad1d-425a7d359014) |
+
+---
 
 ## 2. Spatial Filtering: Convolution (Q3)
 
