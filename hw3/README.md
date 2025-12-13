@@ -1,4 +1,5 @@
 # EE 4065 - Embedded Digital Image Processing: Homework 3
+[Homework File (PDF)](EE4065_Homework_3.pdf)
 
 
 | Name | Student ID |
