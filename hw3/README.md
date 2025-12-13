@@ -799,8 +799,8 @@ except Exception as e:
 
 
 ---
-## Question 3: Morphological Operations
----
+## #Question 3: Morphological Operations
+
 This final section demonstrates binary image processing algorithms implemented from scratch on the STM32. The system performs **Erosion, Dilation, Opening, and Closing** operations on a binary image sent from the PC.
 
 ### Results
