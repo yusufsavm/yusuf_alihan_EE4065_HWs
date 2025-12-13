@@ -1091,6 +1091,80 @@ void Error_Handler(void)
 }
 ```
 
+### 🐍 Python Code (PC Side - Morphology)
+This script is specifically designed for the morphological operations. It sends a grayscale image to the STM32 and visualizes the binary result (Erosion, Dilation, Opening, or Closing) returned by the microcontroller.
+
+```python
+import serial
+import cv2
+import numpy as np
+import time
+
+# --- CONFIGURATION ---
+COM_PORT = 'COM8'       # Check Device Manager for STM32 Port
+BAUD_RATE = 115200      # Must match STM32 settings
+IMG_WIDTH = 64
+IMG_HEIGHT = 64
+IMAGE_PATH = r'.emb_hw\Include\mainimg.png' # Path to input image
+
+try:
+    # 1. Start Serial Connection
+    ser = serial.Serial(COM_PORT, BAUD_RATE, timeout=5)
+    print(f"Connected: {COM_PORT}")
+    time.sleep(2) # Wait for connection stability
+
+    # 2. Load and Prepare Image
+    # For Q3, we need grayscale/binary data
+    img = cv2.imread(IMAGE_PATH, cv2.IMREAD_GRAYSCALE)
+    
+    if img is None:
+        print("ERROR: Image not found!")
+        exit()
+
+    # Resize to 64x64
+    img_resized = cv2.resize(img, (IMG_WIDTH, IMG_HEIGHT))
+
+    # 3. Send Data (4096 Bytes)
+    data_to_send = img_resized.flatten().tobytes()
+    ser.write(data_to_send)
+    print(f"Data sent ({len(data_to_send)} bytes)... Waiting for processing.")
+
+    # 4. Receive Response
+    # STM32 returns the processed image (4096 bytes)
+    expected_size = IMG_WIDTH * IMG_HEIGHT
+    received_data = ser.read(expected_size)
+
+    if len(received_data) == expected_size:
+        print("Result received successfully!")
+
+        # 5. Convert Data to Image
+        processed_img = np.frombuffer(received_data, dtype=np.uint8)
+        processed_img = processed_img.reshape((IMG_HEIGHT, IMG_WIDTH))
+
+        # 6. Display Results
+        cv2.imshow("Original (64x64)", img_resized)
+        cv2.imshow("STM32 Morphology Result", processed_img)
+
+        # Save Result
+        save_name = "morphology_result.png"
+        cv2.imwrite(save_name, processed_img)
+        print(f"Processed image saved as '{save_name}'.")
+
+        print("Press any key to exit...")
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+    
+    else:
+        print(f"ERROR: Incomplete data or timeout! Expected: {expected_size}, Got: {len(received_data)}")
+
+    ser.close()
+
+except serial.SerialException:
+    print(f"ERROR: Could not connect to {COM_PORT}. Check connection.")
+except Exception as e:
+    print(f"Unexpected error: {e}")
+```
+
 
 
 
