@@ -793,7 +793,303 @@ except Exception as e:
     print(f"Error: {e}")
 ```
 
+## Question 3: Morphological Operations
 
+This final section demonstrates binary image processing algorithms implemented from scratch on the STM32. The system performs **Erosion, Dilation, Opening, and Closing** operations on a binary image sent from the PC.
+
+### Results
+The following results show the effect of different morphological operators on the input image.
+
+| Dilation (Yayma) | Erosion (Aşındırma) | Opening (Açma) | Closing (Kapama) |
+| :---: | :---: | :---: | :---: |
+| ![Dilation](https://github.com/user-attachments/assets/466e3233-9d24-4f63-a920-71076ebf97ba) | ![Erosion](https://github.com/user-attachments/assets/0ee6b145-b0c7-41b5-9e50-cd14ac901e4b) | ![Opening](https://github.com/user-attachments/assets/d0c5927f-0896-404a-8b2b-5cfab6a77372) | ![Closing](https://github.com/user-attachments/assets/76d39abf-78e2-4f98-b561-c310b83eafd6) |
+
+### STM32 C Code Implementation (Morphology)
+The following code implements the sliding window (kernel) logic for morphological operations.
+
+```c
+/* USER CODE BEGIN Header */
+/**
+  ******************************************************************************
+  * @file           : main.c
+  * @brief          : Main program body (Only Q3 - Morphology)
+  ******************************************************************************
+  */
+/* USER CODE END Header */
+
+/* Includes ------------------------------------------------------------------*/
+#include "main.h"
+#include <stdint.h>
+#include <string.h> // memcpy icin
+
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
+
+/* USER CODE END Includes */
+
+/* Private typedef -----------------------------------------------------------*/
+/* USER CODE BEGIN PTD */
+
+/* USER CODE END PTD */
+
+/* Private define ------------------------------------------------------------*/
+/* USER CODE BEGIN PD */
+#define WIDTH  64
+#define HEIGHT 64
+#define IMG_SIZE (WIDTH * HEIGHT)
+/* USER CODE END PD */
+
+/* Private macro -------------------------------------------------------------*/
+/* USER CODE BEGIN PM */
+
+/* USER CODE END PM */
+
+/* Private variables ---------------------------------------------------------*/
+UART_HandleTypeDef huart2;
+
+/* USER CODE BEGIN PV */
+uint8_t img_buffer[IMG_SIZE];   // Gelen ve giden resim
+uint8_t temp_buffer[IMG_SIZE];  // İşlem sırasındaki yedek alan
+/* USER CODE END PV */
+
+/* Private function prototypes -----------------------------------------------*/
+void SystemClock_Config(void);
+void MX_GPIO_Init(void);          // static kaldirildi
+void MX_USART2_UART_Init(void);   // static kaldirildi
+/* USER CODE BEGIN PFP */
+
+/* USER CODE END PFP */
+
+/* Private user code ---------------------------------------------------------*/
+/* USER CODE BEGIN 0 */
+
+// --- MORFOLOJİK OPERASYONLAR ---
+
+// 1. EROSION (Aşındırma): 3x3 alanda bir tane bile SİYAH (0) varsa, merkez SİYAH olur.
+void morphology_erode(uint8_t *input, uint8_t *output, int width, int height) {
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            // Kenarları koruma (siyah bırak)
+            if (x == 0 || x == width - 1 || y == 0 || y == height - 1) {
+                output[y * width + x] = 0;
+                continue;
+            }
+
+            uint8_t min_val = 255;
+            for (int ky = -1; ky <= 1; ky++) {
+                for (int kx = -1; kx <= 1; kx++) {
+                    // Komşuya bak
+                    int pixel_val = input[(y + ky) * width + (x + kx)];
+                    // Eğer komşu siyahsa (0), biz de siyah olacağız
+                    if (pixel_val == 0) min_val = 0;
+                }
+            }
+            output[y * width + x] = min_val;
+        }
+    }
+}
+
+// 2. DILATION (Yayma): 3x3 alanda bir tane bile BEYAZ (255) varsa, merkez BEYAZ olur.
+void morphology_dilate(uint8_t *input, uint8_t *output, int width, int height) {
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            // Kenar kontrolü
+            if (x == 0 || x == width - 1 || y == 0 || y == height - 1) {
+                output[y * width + x] = 0;
+                continue;
+            }
+
+            uint8_t max_val = 0;
+            for (int ky = -1; ky <= 1; ky++) {
+                for (int kx = -1; kx <= 1; kx++) {
+                    int pixel_val = input[(y + ky) * width + (x + kx)];
+                    // Eğer komşu beyazsa, biz de beyaz olacağız
+                    if (pixel_val == 255) max_val = 255;
+                }
+            }
+            output[y * width + x] = max_val;
+        }
+    }
+}
+
+// 3. OPENING (Açma): Önce Erode, Sonra Dilate
+// Gürültüyü (küçük beyaz noktaları) temizler.
+void morphology_opening(uint8_t *img, uint8_t *temp, int width, int height) {
+    // 1. Adım: Erode yap -> Sonuç temp'e yazılır
+    morphology_erode(img, temp, width, height);
+
+    // 2. Adım: Temp'i al, Dilate yap -> Sonuç tekrar img'ye (ana buffera) yazılır
+    morphology_dilate(temp, img, width, height);
+}
+
+// 4. CLOSING (Kapama): Önce Dilate, Sonra Erode
+// Nesne içindeki delikleri kapatır.
+void morphology_closing(uint8_t *img, uint8_t *temp, int width, int height) {
+    // 1. Adım: Dilate yap -> Sonuç temp'e
+    morphology_dilate(img, temp, width, height);
+
+    // 2. Adım: Temp'i al, Erode yap -> Sonuç img'ye
+    morphology_erode(temp, img, width, height);
+}
+
+/* USER CODE END 0 */
+
+/**
+  * @brief  The application entry point.
+  * @retval int
+  */
+int main(void)
+{
+  /* MCU Configuration--------------------------------------------------------*/
+  HAL_Init();
+  SystemClock_Config();
+  MX_GPIO_Init();
+  MX_USART2_UART_Init();
+
+  /* Infinite loop */
+  while (1)
+  {
+        // 1. Resmi Al (4096 Byte - Binary/Grayscale)
+        if (HAL_UART_Receive(&huart2, img_buffer, IMG_SIZE, HAL_MAX_DELAY) == HAL_OK)
+        {
+            // Ödevde "Use binary image" dediği için gelen veriyi netleştirelim.
+            // Eğer gri tonlu geldiyse >127 olanları 255 (Beyaz), altını 0 (Siyah) yapalım.
+            for(int i=0; i<IMG_SIZE; i++) {
+                if(img_buffer[i] > 140) img_buffer[i] = 255;
+                else img_buffer[i] = 0;
+            }
+
+            // 2. Morfolojik İşlemi Uygula
+            // Şuan "Opening" aktif. Diğerlerini denemek için yorum satırlarını değiştirebilirsin.
+            morphology_opening(img_buffer, temp_buffer, WIDTH, HEIGHT);
+
+            // Alternatifler:
+           // morphology_closing(img_buffer, temp_buffer, WIDTH, HEIGHT);
+
+            //morphology_erode(img_buffer, temp_buffer, WIDTH, HEIGHT);
+           // memcpy(img_buffer, temp_buffer, IMG_SIZE);
+
+           // morphology_dilate(img_buffer, temp_buffer, WIDTH, HEIGHT);
+           // memcpy(img_buffer, temp_buffer, IMG_SIZE);
+
+            // 3. Sonucu Geri Gönder
+            HAL_UART_Transmit(&huart2, img_buffer, IMG_SIZE, HAL_MAX_DELAY);
+        }
+  }
+}
+
+/**
+  * @brief System Clock Configuration
+  * @retval None
+  */
+void SystemClock_Config(void)
+{
+  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+
+  /** Configure the main internal regulator output voltage
+  */
+  __HAL_RCC_PWR_CLK_ENABLE();
+  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE3);
+
+  /** Initializes the RCC Oscillators according to the specified parameters
+  * in the RCC_OscInitTypeDef structure.
+  */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
+  RCC_OscInitStruct.PLL.PLLM = 16;
+  RCC_OscInitStruct.PLL.PLLN = 336;
+  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV4;
+  RCC_OscInitStruct.PLL.PLLQ = 2;
+  RCC_OscInitStruct.PLL.PLLR = 2;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Initializes the CPU, AHB and APB buses clocks
+  */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+}
+
+/**
+  * @brief USART2 Initialization Function
+  * @param None
+  * @retval None
+  */
+void MX_USART2_UART_Init(void)
+{
+  huart2.Instance = USART2;
+  huart2.Init.BaudRate = 115200;
+  huart2.Init.WordLength = UART_WORDLENGTH_8B;
+  huart2.Init.StopBits = UART_STOPBITS_1;
+  huart2.Init.Parity = UART_PARITY_NONE;
+  huart2.Init.Mode = UART_MODE_TX_RX;
+  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+}
+
+/**
+  * @brief GPIO Initialization Function
+  * @param None
+  * @retval None
+  */
+void MX_GPIO_Init(void)
+{
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+  /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOH_CLK_ENABLE();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : B1_Pin */
+  GPIO_InitStruct.Pin = B1_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : LD2_Pin */
+  GPIO_InitStruct.Pin = LD2_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
+}
+
+/**
+  * @brief  This function is executed in case of error occurrence.
+  * @retval None
+  */
+void Error_Handler(void)
+{
+  __disable_irq();
+  while (1)
+  {
+  }
+}
+```
 
 
 
