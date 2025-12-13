@@ -351,7 +351,91 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
+```
 
+### 🐍 Python Code (PC Side)
+The following Python script handles the image transmission via UART. It reads the image, resizes it, sends it to the STM32, and visualizes the processed result received from the microcontroller.
+
+```python
+import serial
+import cv2
+import numpy as np
+import time
+
+# --- AYARLAR (CONFIGURATION) ---
+COM_PORT = 'COM8'      # STM32'nin bagli oldugu port
+BAUD_RATE = 115200     # STM32'deki huart2.Init.BaudRate ile ayni olmali
+IMG_WIDTH = 64         # C kodundaki WIDTH ile ayni olmali
+IMG_HEIGHT = 64        # C kodundaki HEIGHT ile ayni olmali
+IMAGE_PATH = r'.emb_hw\Include\mainimg.png' # Test edilecek resim yolu
+
+try:
+    # 1. Seri Portu Ac
+    ser = serial.Serial(COM_PORT, BAUD_RATE, timeout=2)
+    print(f"Baglanti acildi: {COM_PORT}")
+    time.sleep(2) # Baglantinin oturmasi icin bekleme
+
+    # 2. Resmi Yukle ve Hazirla
+    # Resmi gri tonlamali (grayscale) olarak oku
+    img = cv2.imread(IMAGE_PATH, cv2.IMREAD_GRAYSCALE)
+    
+    if img is None:
+        print("HATA: Resim bulunamadi! Dosya yolunu kontrol et.")
+        exit()
+
+    # Resmi STM32'nin bekledigi boyuta getir
+    img_resized = cv2.resize(img, (IMG_WIDTH, IMG_HEIGHT))
+    
+    # Resmi tek boyutlu byte dizisine cevir (Flatten)
+    data_to_send = img_resized.flatten().tobytes()
+    print(f"Gonderilen veri boyutu: {len(data_to_send)} bytes")
+
+    # 3. Veriyi STM32'ye Gonder
+    ser.write(data_to_send)
+    print("Veri gonderildi, islenmesi bekleniyor...")
+
+    # 4. Cevabi Bekle ve Oku
+    # Gonderdigimiz kadar veriyi geri bekliyoruz
+    received_data = ser.read(len(data_to_send))
+    thresh_byte = ser.read(1)
+    
+    if thresh_byte:
+        # Gelen byte verisini tam sayıya (integer) çevir
+        thresh_val = int.from_bytes(thresh_byte, byteorder='little')
+        print(f"STM32 Tarafindan Hesaplanan Otsu Esik Degeri: {thresh_val}")
+    else:
+        print("Uyari: Esik degeri okunamadi!")
+
+    if len(received_data) != len(data_to_send):
+        print(f"HATA: Eksik veri geldi! Beklenen: {len(data_to_send)}, Gelen: {len(received_data)}")
+    else:
+        print("Veri basariyla alindi!")
+
+    # 5. Gelen Veriyi Gorsele Cevir
+    # Byte verisini numpy dizisine cevir
+    processed_img = np.frombuffer(received_data, dtype=np.uint8)
+    
+    # Diziyi tekrar kare (resim) formatina sok
+    processed_img = processed_img.reshape((IMG_HEIGHT, IMG_WIDTH))
+
+    # 6. Sonuclari Ekrana Bas
+    cv2.imshow("Orijinal (Kucultulmus)", img_resized)
+    cv2.imshow("STM32 Islenmis (Otsu)", processed_img)
+
+    kayit_adi = "otsu_sonuc.png"
+    cv2.imwrite(kayit_adi, processed_img)
+    print(f"Islenen resim '{kayit_adi}' olarak kaydedildi!")
+
+    print("Cikmak icin bir tusa basin...")
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    ser.close()
+
+except serial.SerialException:
+    print(f"HATA: {COM_PORT} portuna baglanilamadi. Portun baska programda acik olmadigindan emin ol.")
+except Exception as e:
+    print(f"Bir hata olustu: {e}")
+```
 
 
 Embeded Image Processing Homework 3
