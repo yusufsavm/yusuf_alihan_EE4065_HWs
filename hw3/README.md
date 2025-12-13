@@ -1,16 +1,16 @@
-# EE 4065 - Embedded Digital Image Processing: Homework 3
+### EE 4065 - Embedded Digital Image Processing: Homework 3
 
 **Students:**
 * Yusuf Oruç (150720036)
 * Alihan Kocaakman (150720065)
+---
 
 
-
-## Question 1: Otsu's Thresholding
-
+# Question 1: Otsu's Thresholding
+---
 This section demonstrates the implementation of Otsu's thresholding method on an STM32 microcontroller. The image is sent from a PC via UART, processed on the MCU, and the result is sent back.
 
-### Results
+## Results
 
 | Original Image (64x64) | Otsu Applied | Threshold Value Graph |
 | :---: | :---: | :---: |
@@ -440,8 +440,8 @@ except Exception as e:
 ```
 
 
-## Question 2: Otsu's Thresholding (Color Images)
-
+# Question 2: Otsu's Thresholding (Color Images)
+---
 This section extends the Otsu method to color images. The STM32 receives an RGB image, converts it internally to grayscale to calculate the threshold, and then applies this threshold to the original RGB channels before sending the result back.
 
 ## Results
@@ -794,16 +794,16 @@ except Exception as e:
     print(f"Error: {e}")
 ```
 
-## Question 3: Morphological Operations
-
+# Question 3: Morphological Operations
+---
 This final section demonstrates binary image processing algorithms implemented from scratch on the STM32. The system performs **Erosion, Dilation, Opening, and Closing** operations on a binary image sent from the PC.
 
 ## Results
 The following results show the effect of different morphological operators on the input image.
 
-| Dilation (Yayma) | Erosion (Aşındırma) | Opening (Açma) | Closing (Kapama) |
-| :---: | :---: | :---: | :---: |
-| ![Dilation](https://github.com/user-attachments/assets/466e3233-9d24-4f63-a920-71076ebf97ba) | ![Erosion](https://github.com/user-attachments/assets/0ee6b145-b0c7-41b5-9e50-cd14ac901e4b) | ![Opening](https://github.com/user-attachments/assets/d0c5927f-0896-404a-8b2b-5cfab6a77372) | ![Closing](https://github.com/user-attachments/assets/76d39abf-78e2-4f98-b561-c310b83eafd6) |
+| Original Image (64x64) | Dilation (Yayma) | Erosion (Aşındırma) | Opening (Açma) | Closing (Kapama) |
+| :---: | :---: | :---: | :---: | :---: |
+| ![Original Image (64x64)](https://github.com/user-attachments/assets/b8f60f85-d335-4e86-b402-e4dd956ab626) | ![Dilation](https://github.com/user-attachments/assets/466e3233-9d24-4f63-a920-71076ebf97ba) | ![Erosion](https://github.com/user-attachments/assets/0ee6b145-b0c7-41b5-9e50-cd14ac901e4b) | ![Opening](https://github.com/user-attachments/assets/d0c5927f-0896-404a-8b2b-5cfab6a77372) | ![Closing](https://github.com/user-attachments/assets/76d39abf-78e2-4f98-b561-c310b83eafd6) |
 
 ## STM32 C Code Implementation (Morphology)
 The following code implements the sliding window (kernel) logic for morphological operations.
