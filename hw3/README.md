@@ -718,6 +718,80 @@ void Error_Handler(void)
 }
 ```
 
+### 🐍 Python Code (PC Side - Color Support)
+This script handles the transmission of color images. It converts the image from OpenCV's default **BGR** format to **RGB** before sending it to the STM32. Upon receiving the processed data, it converts it back to BGR for correct display and saving.
+
+```python
+import serial
+import cv2
+import numpy as np
+import time
+
+# --- CONFIGURATION ---
+COM_PORT = 'COM8'
+BAUD_RATE = 115200
+IMG_WIDTH = 64
+IMG_HEIGHT = 64
+IMAGE_PATH = 'resized2.jpg'
+
+try:
+    ser = serial.Serial(COM_PORT, BAUD_RATE, timeout=5)
+    print(f"Connected: {COM_PORT}")
+    time.sleep(2) # Wait for connection stability
+
+    # 1. Read Image (Color Mode)
+    img = cv2.imread(IMAGE_PATH, cv2.IMREAD_COLOR)
+    
+    if img is None:
+        print("Error: Image not found!")
+        exit()
+
+    img_resized = cv2.resize(img, (IMG_WIDTH, IMG_HEIGHT))
+    
+    # BGR -> RGB Conversion (Crucial for correct color on STM32)
+    img_rgb = cv2.cvtColor(img_resized, cv2.COLOR_BGR2RGB)
+
+    # 2. Send Data
+    data_to_send = img_rgb.flatten().tobytes()
+    ser.write(data_to_send)
+    print("Data sent...")
+
+    # 3. Receive Response (Expect 64*64*3 bytes for Color)
+    expected_size = IMG_WIDTH * IMG_HEIGHT * 3 
+    received_data = ser.read(expected_size)
+    thresh_byte = ser.read(1)
+    
+    if thresh_byte:
+        val = int.from_bytes(thresh_byte, 'little')
+        print(f"Otsu Threshold: {val}")
+
+    if len(received_data) == expected_size:
+        # 4. Process Received Data
+        processed_img = np.frombuffer(received_data, dtype=np.uint8)
+        
+        # Reshape to 3D Array (Height, Width, Channels)
+        processed_img = processed_img.reshape((IMG_HEIGHT, IMG_WIDTH, 3))
+        
+        # RGB -> BGR Conversion for OpenCV Display
+        processed_bgr = cv2.cvtColor(processed_img, cv2.COLOR_RGB2BGR)
+
+        # 5. Display & Save Results
+        cv2.imshow("Original", img_resized)
+        cv2.imshow("STM32 Color Otsu", processed_bgr)
+        
+        cv2.imwrite("renkli_otsu_sonuc.png", processed_bgr)
+        print("Result saved successfully.")
+
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+    else:
+        print(f"Error: Incomplete data. Expected {expected_size}, got {len(received_data)}")
+    
+    ser.close()
+
+except Exception as e:
+    print(f"Error: {e}")
+```
 
 
 
