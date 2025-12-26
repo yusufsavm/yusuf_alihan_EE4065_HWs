@@ -155,7 +155,7 @@ The confusion matrix below demonstrates the model's performance on the test set.
 
 ![Neural Network Confusion Matrix](https://github.com/user-attachments/assets/8ab4a9fb-60b7-4c10-8060-065eaf737602)
 
-**Based on the Figure **(Confusion Matrix):
+#### Based on the Figure (Confusion Matrix):
 
 Overall Improvement: The strong diagonal line (high values like 829, 1102, 722) indicates that the Multilayer Perceptron (MLP) successfully learned non-linear relationships, significantly outperforming the single neuron approach.
 
