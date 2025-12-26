@@ -32,6 +32,7 @@ We implemented two different approaches to classify handwritten digits by extrac
 
 ### Confusion Matrix (Q1)
 ![Figure_1](https://github.com/user-attachments/assets/482cbd20-6963-412f-9c9e-37e4a69ebf27)
+
 Based on the Figure (Confusion Matrix):
 
 High Sensitivity for Class "0": The model demonstrates strong performance in identifying the target class. Out of 980 actual "0" digits in the test set, the model correctly classified 945 (True Negatives in the context of "0" vs "Not-0"). This indicates that the extracted Hu Moments successfully capture the circular geometric features of the digit zero.
