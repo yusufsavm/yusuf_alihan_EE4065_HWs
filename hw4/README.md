@@ -32,6 +32,11 @@ We implemented two different approaches to classify handwritten digits by extrac
 
 ### Confusion Matrix (Q1)
 ![Figure_1](https://github.com/user-attachments/assets/482cbd20-6963-412f-9c9e-37e4a69ebf27)
+Based on the Figure (Confusion Matrix):
+
+High Sensitivity for Class "0": The model demonstrates strong performance in identifying the target class. Out of 980 actual "0" digits in the test set, the model correctly classified 945 (True Negatives in the context of "0" vs "Not-0"). This indicates that the extracted Hu Moments successfully capture the circular geometric features of the digit zero.
+
+High False Negative Rate: The most significant error is observed in the bottom-left quadrant (1476 instances). This represents the "False Negative" count where the model incorrectly classified non-zero digits (1-9) as "0".
 
 ### Source Code (Q1)
 
@@ -148,7 +153,21 @@ model.save("mnist_single_neuron.h5")
 The confusion matrix below demonstrates the model's performance on the test set. The diagonal elements represent correctly classified digits.
 
 ![Neural Network Confusion Matrix](https://github.com/user-attachments/assets/8ab4a9fb-60b7-4c10-8060-065eaf737602)
+Based on the Figure (Confusion Matrix):
 
+Overall Improvement: The strong diagonal line (high values like 829, 1102, 722) indicates that the Multilayer Perceptron (MLP) successfully learned non-linear relationships, significantly outperforming the single neuron approach.
+
+Class-Specific Performance:
+
+Best Performance (Digit 1): The digit "1" has the highest classification accuracy (1102 correct predictions). Its distinct geometric shape (a simple vertical line) produces a unique Hu Moment signature that is easily separable from other digits.
+
+Weak Performance (Digits 2, 4, 5): The model struggles significantly with these digits. For example, the digit "2" was correctly classified only 364 times. It was frequently misclassified as "4" (211 times) or "5" (137 times), suggesting that their moment invariants are clustered very closely in the feature space.
+
+Specific Confusion Clusters:
+
+4 vs. 9: There is notable confusion between "4" and "9" (132 misclassifications). In handwriting, the closed upper loops of these digits often result in similar geometric moments.
+
+Conclusion: While the hidden layers of the MLP allowed for non-linear decision boundaries, the accuracy is ultimately bottlenecked by the feature extraction method. Reducing a 784-pixel image to just 7 Hu Moments results in significant information loss, making it difficult to distinguish between geometrically similar digits (like 2, 4, and 5) regardless of the classifier's complexity.
 ### Source Code (Q2)
 
 ```python
