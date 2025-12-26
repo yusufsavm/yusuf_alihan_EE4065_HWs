@@ -60,6 +60,7 @@ def load_labels(path):
 # File Paths
 train_img_path = os.path.join("train-images.idx3-ubyte")
 train_label_
+```
 ---
 
 ## Q2 - Section 11.8: Neural Network Classifier (Multiclass)
