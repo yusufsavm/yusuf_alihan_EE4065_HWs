@@ -33,7 +33,7 @@ We implemented two different approaches to classify handwritten digits by extrac
 ### Confusion Matrix (Q1)
 ![Figure_1](https://github.com/user-attachments/assets/482cbd20-6963-412f-9c9e-37e4a69ebf27)
 
-Based on the Figure (Confusion Matrix):
+**Based on the Figure **(Confusion Matrix):
 
 High Sensitivity for Class "0": The model demonstrates strong performance in identifying the target class. Out of 980 actual "0" digits in the test set, the model correctly classified 945 (True Negatives in the context of "0" vs "Not-0"). This indicates that the extracted Hu Moments successfully capture the circular geometric features of the digit zero.
 
@@ -154,7 +154,8 @@ model.save("mnist_single_neuron.h5")
 The confusion matrix below demonstrates the model's performance on the test set. The diagonal elements represent correctly classified digits.
 
 ![Neural Network Confusion Matrix](https://github.com/user-attachments/assets/8ab4a9fb-60b7-4c10-8060-065eaf737602)
-Based on the Figure (Confusion Matrix):
+
+**Based on the Figure **(Confusion Matrix):
 
 Overall Improvement: The strong diagonal line (high values like 829, 1102, 722) indicates that the Multilayer Perceptron (MLP) successfully learned non-linear relationships, significantly outperforming the single neuron approach.
 
