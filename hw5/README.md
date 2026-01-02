@@ -1,120 +1,3 @@
-# STM32 Embedded AI: Audio & Image Classification Projects
-
-This repository contains two distinct implementation of embedded machine learning applications on an STM32 microcontroller using **X-CUBE-AI**. The projects demonstrate the complete pipeline from data preprocessing and model training in Python (TensorFlow/Keras) to deployment on embedded hardware.
-
-## Projects Overview
-
-1.  **Audio Classification:** Spoken Digit Recognition using MFCC features.
-2.  **Image Classification:** MNIST Digit Recognition using Hu Moments (Feature Extraction).
-
----
-
-## 🛠 Technologies & Tools
-
-* **Hardware:** STM32 Microcontroller
-* **Software:** STM32CubeIDE, STM32CubeMX, X-CUBE-AI
-* **ML Framework:** TensorFlow, Keras, Scikit-learn
-* **Language:** Python (Training), C (Inference)
-* **Signal Processing:** Librosa/Scipy (Audio), OpenCV (Image)
-
----
-
-## 1. Audio Classification: Spoken Digit Recognition
-
-This project classifies spoken digits (0-9) using the Free Spoken Digit Dataset (FSDD). Instead of raw audio, we use Mel-frequency cepstral coefficients (MFCC) for feature extraction to reduce computational load on the MCU.
-
-### 🔹 Methodology
-* **Input:** `.wav` audio files (8kHz sample rate).
-* **Feature Extraction:** * FFT Size: 1024
-    * Mel Filters: 20
-    * DCT Outputs: 13 (Total 26 inputs: 13 MFCC + 13 Delta).
-* **Model Architecture:** MLP (Dense Neural Network)
-    * Input (26) -> Dense(100, ReLU) -> Dense(100, ReLU) -> Output(10, Softmax).
-
-### 📊 Results
-The model was trained for 100 epochs. Below is the confusion matrix showing the prediction performance on the test set:
-
-![Audio Confusion Matrix](https://github.com/user-attachments/assets/0eaa6c0b-fbb7-48e6-9928-45bcb72d36db)
-
-### 📂 Key Files (Audio)
-* `train_keyword_spotting.py`: Extracts MFCC features, trains the MLP model, and saves as `.h5`.
-* `create_real_input.py`: Converts a real `.wav` file into a C header file (`test_input.h`) containing the MFCC array for testing on STM32.
-
----
-
-## 2. Image Classification: MNIST with Hu Moments
-
-This project classifies handwritten digits from the MNIST dataset. To make the model lightweight for embedded systems, we do not use raw pixels (28x28). Instead, we extract **Hu Moments** (7 invariant features) using OpenCV.
-
-### 🔹 Methodology
-* **Input:** MNIST Images.
-* **Feature Extraction:** * Calculated **Hu Moments** (7 values per image).
-    * **Normalization:** Features are normalized (Mean/Std) to improve convergence.
-* **Model Architecture:** MLP
-    * Input (7) -> Dense(100, ReLU) -> Dense(100, ReLU) -> Output(10, Softmax).
-
-### 📊 Results
-The model achieved high accuracy using only 7 input features.
-
-![Image Confusion Matrix](https://github.com/user-attachments/assets/e6d36028-9f3f-46c4-b318-325310b4e2b0)
-
-### 📂 Key Files (Image)
-* `h5_to_c.py`: Loads the trained model, calculates Mean/Std from training data, and generates `hw5_q2_data.h` containing weights and normalization parameters for C code.
-* `test_data_generate.py`: Extracts samples from the MNIST test set and generates `hw5_q2_test_data.h` for on-device verification.
-
----
-
-## 🚀 STM32 Deployment Workflow
-
-The deployment process follows these steps for both projects:
-
-1.  **Train Model:** Train the Keras model (`.h5`) in Python.
-2.  **Convert to TFLite:** Use `tf.lite.TFLiteConverter` to create a `.tflite` file.
-3.  **X-CUBE-AI Integration:** Import the `.tflite` model into the STM32 project using the X-CUBE-AI plugin.
-4.  **C Code Integration:**
-    * Include the generated header files for test inputs.
-    * Modify `app_x-cube-ai.c` to load data into the input buffer.
-    * Run inference (`ai_run`) and parse the output buffer.
-
-### C Implementation Snippet (`app_x-cube-ai.c`)
-
-The inference logic inside the microcontroller:
-
-```c
-// 1. Load Data (from generated header)
-for (int i = 0; i < INPUT_SIZE; i++) {
-    in_data[i] = (ai_float)test_input_data[i];
-}
-
-// 2. Run Inference
-ai_run();
-
-// 3. Process Output (Argmax)
-float max_prob = 0.0f;
-int predicted_digit = -1;
-
-for (int i = 0; i < 10; i++) {
-    if (out_data[i] > max_prob) {
-        max_prob = out_data[i];
-        predicted_digit = i;
-    }
-}
-
-
-
-
-////////////////
-
-
-
-
-
-
-
-
-
-
-
 # EE 4065 - Embedded Digital Image Processing: Homework 5
 
 **Course:** EE 4065 - Embedded Digital Image Processing
@@ -251,6 +134,7 @@ except Exception as e:
 
 
 ### tflite to test_input_h
+```python
 
 import os
 
@@ -277,10 +161,11 @@ with open(output_header_path, 'w') as f:
     f.write(f'const unsigned int {array_name}_len = {len(data)};\n')
 
 print(f"{output_header_path} başarıyla oluşturuldu!")
+```
+---
 
-
-app_c-cube-ai.c
-
+### app_c-cube-ai.c
+```c
 
 /**
   ******************************************************************************
@@ -560,10 +445,11 @@ void MX_X_CUBE_AI_Process(void)
 #ifdef __cplusplus
 }
 #endif
+```
+---
 
-
-create_real_input.py
-
+### create_real_input.py
+```python
 import numpy as np
 import os
 # Senin eğitimde kullandığın fonksiyonu çağırıyoruz
@@ -648,20 +534,20 @@ const float test_input_mfcc[26] = {{
 
 if __name__ == "__main__":
     generate_header()
+```
+---
 
 
 
 
 
-
-question 2
-
-result
+## #Question 2
+### Result
 <img width="504" height="239" alt="hw5_q2" src="https://github.com/user-attachments/assets/e6d36028-9f3f-46c4-b318-325310b4e2b0" />
 
 
-training code
-
+### training code
+```python
 import os
 import numpy as np
 import cv2
@@ -758,10 +644,11 @@ cm_display.ax_.set_title("Neural Network Confusion Matrix (Multiclass)")
 plt.show()
 
 print("İşlem tamamlandı. 'mlp_mnist_model.h5' kaydedildi.")
+```
+---
 
-
-h5_to_tflite
-
+### h5_to_tflite
+```python
 import tensorflow as tf
 
 # 1. Modeli yükle
@@ -785,10 +672,11 @@ with open(output_path, 'wb') as f:
     f.write(tflite_model)
 
 print(f"BASARILI! '{output_path}' dosyasi olusturuldu.")
+```
+---
 
-
-h5_to_c
-
+### h5_to_c
+```python
 import os
 import numpy as np
 import cv2
@@ -894,10 +782,11 @@ def export_model_to_c():
 
 if __name__ == "__main__":
     export_model_to_c()
+```
+---
 
-
-test_data_generate
-
+### test_data_generate
+```python
 import os
 import numpy as np
 import cv2
@@ -972,10 +861,11 @@ def create_test_header():
 
 if __name__ == "__main__":
     create_test_header()
+```
+---
 
-
-app_x-cube-ai.c
-
+### app_x-cube-ai.c
+```c
 
 /**
   ******************************************************************************
@@ -1240,5 +1130,6 @@ void MX_X_CUBE_AI_Process(void)
 #ifdef __cplusplus
 }
 #endif
-
+```
+---
 
